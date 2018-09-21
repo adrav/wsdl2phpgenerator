@@ -1,11 +1,7 @@
 <?php
-/**
- * @package wsdl2phpTest
- */
+
 namespace Wsdl2PhpGenerator\Tests\Unit;
 
-use PHPUnit_Framework_TestCase;
-use Wsdl2PhpGenerator\Config;
 use Wsdl2PhpGenerator\Validator;
 
 /**
@@ -14,31 +10,17 @@ use Wsdl2PhpGenerator\Validator;
  *
  * @package wsdl2phpTest
  */
-class ValidatorTest extends PHPUnit_Framework_TestCase
+class ValidatorTest extends Wsdl2PhpGeneratorTestCase
 {
-    /**
-     * @var Validator
-     */
-    protected $validator;
-
-    protected function setup()
-    {
-        $config = new Config(array(
-            'inputFile' => null,
-            'outputDir' => null
-        ));
-       $this->validator = new Validator($config);
-    }
-
     /**
      * Testing the validate class function
      */
     public function testValidateClass()
     {
-        $this->assertEquals('foo', $this->validator->validateClass('foo'));
-        $this->assertEquals('foobar', $this->validator->validateClass('foo-bar'));
-        $this->assertEquals('Foo', $this->validator->validateClass('Foo'));
-        $this->assertEquals('foo523', $this->validator->validateClass('foo523'));
+        $this->assertEquals('foo', Validator::validateClass('foo'));
+        $this->assertEquals('foobar', Validator::validateClass('foo-bar'));
+        $this->assertEquals('Foo', Validator::validateClass('Foo'));
+        $this->assertEquals('foo523', Validator::validateClass('foo523'));
     }
 
     /**
@@ -47,9 +29,9 @@ class ValidatorTest extends PHPUnit_Framework_TestCase
     public function testValidateClassReservedKeyword()
     {
         // for is reserved keyword
-        $this->assertEquals('forCustom', $this->validator->validateClass('for'));
+        $this->assertEquals('forCustom', Validator::validateClass('for'));
         // list is reserved keyword. PHP is not case sensitive in keywords
-        $this->assertEquals('ListCustom', $this->validator->validateClass('List'));
+        $this->assertEquals('ListCustom', Validator::validateClass('List'));
     }
 
     /**
@@ -57,14 +39,14 @@ class ValidatorTest extends PHPUnit_Framework_TestCase
      */
     public function testValidateClassExists() {
         // Base handling
-        $this->assertEquals('SoapClientCustom', $this->validator->validateClass('SoapClient'));
+        $this->assertEquals('SoapClientCustom', Validator::validateClass('SoapClient'));
         // Use eval to allow creating a class inside a class.
         eval("class SoapClientCustom {};");
         // Now that both SoapClient and SoapClientCustom are defined we append numbering.
-        $this->assertEquals('SoapClientCustom2', $this->validator->validateClass('SoapClient'));
+        $this->assertEquals('SoapClientCustom2', Validator::validateClass('SoapClient'));
         eval("class SoapClientCustom2 {};");
         // ... And numbering should continue.
-        $this->assertEquals('SoapClientCustom3', $this->validator->validateClass('SoapClient'));
+        $this->assertEquals('SoapClientCustom3', Validator::validateClass('SoapClient'));
     }
 
     /**
@@ -72,38 +54,22 @@ class ValidatorTest extends PHPUnit_Framework_TestCase
      */
     public function testValidateType()
     {
-        $this->assertEquals('foo', $this->validator->validateType('foo'));
-        $this->assertEquals('foobar', $this->validator->validateType('foo-bar'));
-        $this->assertEquals('Foo', $this->validator->validateType('Foo'));
-        $this->assertEquals('foo523', $this->validator->validateType('foo523'));
-        $this->assertEquals('arrayOfTest', $this->validator->validateType('arrayOfTest'));
-        $this->assertEquals('test[]', $this->validator->validateType('test[]'));
+        $this->assertEquals('foo', Validator::validateType('foo'));
+        $this->assertEquals('foobar', Validator::validateType('foo-bar'));
+        $this->assertEquals('Foo', Validator::validateType('Foo'));
+        $this->assertEquals('foo523', Validator::validateType('foo523'));
+        $this->assertEquals('arrayOfTest', Validator::validateType('arrayOfTest'));
+        $this->assertEquals('test[]', Validator::validateType('test[]'));
 
-        $this->assertEquals('int', $this->validator->validateType('nonNegativeInteger'));
-        $this->assertEquals('float', $this->validator->validateType('float'));
-        $this->assertEquals('string', $this->validator->validateType('normalizedString'));
-        $this->assertEquals('string', $this->validator->validateType('<anyXML>'));
-        $this->assertEquals('Foo[]', $this->validator->validateType('Foo[]'));
+        $this->assertEquals('int', Validator::validateType('nonNegativeInteger'));
+        $this->assertEquals('float', Validator::validateType('float'));
+        $this->assertEquals('string', Validator::validateType('normalizedString'));
+        $this->assertEquals('string', Validator::validateType('<anyXML>'));
+        $this->assertEquals('Foo[]', Validator::validateType('Foo[]'));
 
-        $this->assertEquals('andCustom', $this->validator->validateType('and')); // and is reserved keyword
+        $this->assertEquals('andCustom', Validator::validateType('and')); // and is reserved keyword
 
-        $this->assertEquals('validarContrasena[]', $this->validator->validateType('validarContraseña[]')); //UTF-8 array type
-    }
-
-    /**
-     * Test custom class conflict overrides.
-     */
-    public function testClassConflictMap()
-    {
-        $config = new Config(array(
-            'inputFile' => null,
-            'outputDir' => null,
-            'conflictMap' => array('Function' => 'MatchingFunction')
-        ));
-        $this->validator = new Validator($config);
-
-        $result = $this->validator->validateClass('Function');
-        $this->assertEquals('MatchingFunction', $result);
+        $this->assertEquals('validarContrasena[]', Validator::validateType('validarContraseña[]')); //UTF-8 array type
     }
 
 }
